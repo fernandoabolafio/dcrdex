@@ -958,7 +958,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 	}
 
 	c.wait(assetID, trigger, func(err error) {
-		log.Debugf("Registration fee txn %x now has %d confirmations.", coinID, reqConfs)
+		log.Debugf("Registration fee txn %s now has %d confirmations.", coinIDString(assetID, coinID), reqConfs)
 		defer func() {
 			if err != nil {
 				details := fmt.Sprintf("Error encountered while paying fees to %s: %v", dc.acct.url, err)
