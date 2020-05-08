@@ -34,6 +34,8 @@ export default class MarketsPage extends BasePage {
       // Templates, loaders, chart div...
       'marketLoader', 'marketChart', 'marketList', 'rowTemplate', 'buyRows',
       'sellRows',
+      // Registration status
+      'registrationStatus', 'regStatusTitle', 'regStatusMessage','regStatusDex',
       // Order form.
       'orderForm', 'priceBox', 'buyBttn', 'sellBttn', 'baseBalance',
       'quoteBalance', 'limitBttn', 'marketBttn', 'tifBox', 'submitBttn',
@@ -55,6 +57,7 @@ export default class MarketsPage extends BasePage {
       'cancelForm', 'cancelRemain', 'cancelUnit', 'cancelPass', 'cancelSubmit'
     ])
     this.market = null
+    this.registrationStatus = {};
     this.currentForm = null
     this.openAsset = null
     this.openFunc = null
@@ -117,6 +120,7 @@ export default class MarketsPage extends BasePage {
       bind(div, 'click', () => {
         page.marketLoader.classList.remove('d-none')
         this.setMarket(dex, base, quote)
+        this.setDexRegistrationStatus(dex);
       })
       this.markets.push({
         base: base,
@@ -168,13 +172,15 @@ export default class MarketsPage extends BasePage {
     // Notification filters.
     this.notifiers = {
       order: note => { this.handleOrderNote(note) },
-      epoch: note => { this.handleEpochNote(note) }
+      epoch: note => { this.handleEpochNote(note) },
+      feepayment: note => { this.handleFeePaymentNote(note )}
     }
 
     // Fetch the first market in the list, or the users last selected market, if
     // it was found.
     const firstEntry = mktFound ? lastMarket : this.markets[0]
     this.setMarket(firstEntry.dex, firstEntry.base, firstEntry.quote)
+    this.setDexRegistrationStatus(firstEntry.dex);
   }
 
   /* isSell is true if the user has selected sell in the order options. */
@@ -223,6 +229,89 @@ export default class MarketsPage extends BasePage {
     const page = this.page
     Doc.show(page.orderForm)
     Doc.hide(page.loaderMsg)
+  }
+  
+  /* 
+   * updateRegistrationStatusView udpates the view based on the current 
+   * registration status 
+   */
+  updateRegistrationStatusView () {
+    const { feePaid, confirmations, confirmationsRequired } = this.registrationStatus;
+    const page = this.page;
+
+    page.regStatusDex.textContent = this.market.dex.url;
+    function updateHandler(titleContent, messageContent, titleClass) {
+      page.regStatusTitle.textContent = titleContent;
+      page.regStatusMessage.textContent = messageContent;
+      page.regStatusTitle.classList.remove('completed', 'error', 'waiting');
+      page.regStatusTitle.classList.add(titleClass);
+    }
+
+    if(feePaid) {
+      updateHandler('Registration fee payment successful!', '', 'completed');
+      return;
+    }
+
+    const waitingMessage = [confirmations, confirmationsRequired]
+      .every(v => typeof v === 'number') ? `${confirmations}/${confirmationsRequired}` : '';
+    
+    updateHandler('Waiting for confirmations...', waitingMessage, 'waiting');
+  }
+
+  /**
+   * setOrderFormVisibility sets the order form visibility based on the 
+   * current registration status
+   */
+  setOrderFormVisibility () {
+    const page = this.page;
+    this.updateRegistrationStatusView()
+    if(!this.registrationStatus.feePaid) {
+      Doc.hide(page.orderForm)
+      Doc.show(page.registrationStatus);
+    } else {
+      // wait a couple of seconds before showing the form so the success
+      // message is shown to the user
+      setTimeout(() => {
+        Doc.hide(page.registrationStatus);
+        Doc.show(page.orderForm);
+      }, 5000);
+    }
+  }
+
+  /*
+   * setDexRegistration status sets the initial registration status for the
+   * current dex
+   */
+  setDexRegistrationStatus (url) {
+    const dex = app.user.exchanges[url];
+    this.registrationStatus = {
+      feePaid: !dex.feePending
+    }
+    this.setOrderFormVisibility()
+  }
+
+  /* 
+   * updateDexRegistrationStatus updates the registration status by adding the 
+   * required number of confirmations and the current number of confirmations
+   */
+  updateDexRegistrationStatus (confirmationsRequired, confirmations) {
+    this.registrationStatus = {
+      ...this.registrationStatus,
+      confirmations,
+      confirmationsRequired
+    }
+    this.setOrderFormVisibility()
+  }
+
+  /**
+   * markRegistrationStatusAsPaid sets the current dex registration status 
+   * as paid
+   */
+  markRegistrationStatusAsPaid () {
+    this.registrationStatus = {
+      feePaid: true
+    }
+    this.setOrderFormVisibility()
   }
 
   /* setMarket sets the currently displayed market. */
@@ -619,6 +708,21 @@ export default class MarketsPage extends BasePage {
       return
     }
     this.showVerify()
+  }
+
+  handleFeePaymentNote (note) {
+    if(note.dexurl === this.market.dex.url) {
+      // only handle the node if it is referent to the current market dex
+      switch (note.subject) {
+        case 'regupdate':
+            this.updateDexRegistrationStatus(note.confirmationsrequired, note.confirmations)   
+          break;
+      
+        default:
+          break;
+      }
+    }
+    
   }
 
   /*
