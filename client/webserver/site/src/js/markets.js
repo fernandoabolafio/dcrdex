@@ -309,15 +309,15 @@ export default class MarketsPage extends BasePage {
     this.setOrderFormVisibility()
   }
 
-  /**
+  /*
    * markRegistrationStatusAsPaid sets the current dex registration status 
    * as paid
    */
   markRegistrationStatusAsPaid () {
-    this.registrationStatus = {
-      feePaid: true
-    }
-    this.setOrderFormVisibility()
+      this.registrationStatus = {
+        feePaid: true
+      }
+      this.setOrderFormVisibility()
   }
 
   /* setMarket sets the currently displayed market. */
@@ -716,19 +716,24 @@ export default class MarketsPage extends BasePage {
     this.showVerify()
   }
 
+  /*
+   * handleFeePaymentNote is the handler for the 'feepayment'-type notification, which
+   * is used to update the dex registration's status. 
+   */
   handleFeePaymentNote (note) {
     if(note.dexurl === this.market.dex.url) {
-      // only handle the node if it is referent to the current market dex
+      // only handle this note if it is referent to the current market dex
+      
       switch (note.subject) {
         case 'regupdate':
-            this.updateDexRegistrationStatus(note.confirmationsrequired, note.confirmations)   
+          this.updateDexRegistrationStatus(note.confirmationsrequired, note.confirmations)     
           break;
-      
+        case 'regcompleted':
+          this.markRegistrationStatusAsPaid()
         default:
           break;
       }
     }
-    
   }
 
   /*

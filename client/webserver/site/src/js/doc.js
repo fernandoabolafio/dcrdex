@@ -74,6 +74,10 @@ export default class Doc {
     for (const el of els) el.classList.remove('d-hide')
   }
 
+  static isHidden(el) {
+    return el.classList.contains('d-hide');
+  }
+
   /*
    * animate runs the supplied function, which should be a "progress" function
    * accepting one argument. The progress function will be called repeatedly
