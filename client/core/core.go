@@ -838,7 +838,7 @@ func (c *Core) Register(form *RegisterForm) error {
 	}
 
 	details := fmt.Sprintf("Waiting for %d confirmations before trading at %s", dc.cfg.RegFeeConfirms, dc.acct.url)
-	c.notify(newFeePaymentNote("Fee payment in progress", details, db.Success))
+	c.notify(newFeePaymentNote("Fee payment in progress", details, db.Success, dc.acct.url))
 
 	// Set up the coin waiter.
 	c.verifyRegistrationFee(wallet, dc, coin.ID(), regFeeAssetID)
@@ -862,7 +862,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 		details := fmt.Sprintf("Fee payment confirmations %v/%v", confs, uint32(reqConfs))
 
 		if confs < uint32(reqConfs) {
-			c.notify(newFeePaymentNoteWithConfirmations("Waiting for confirmations", details, db.Data, uint32(reqConfs), confs))
+			c.notify(newFeePaymentNoteWithConfirmations("regupdate", details, db.Data, uint32(reqConfs), confs, dc.acct.url))
 		}
 
 		return confs >= uint32(reqConfs), nil
@@ -873,10 +873,10 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 		defer func() {
 			if err != nil {
 				details := fmt.Sprintf("Error encountered while paying fees to %s: %v", dc.acct.url, err)
-				c.notify(newFeePaymentNote("Fee payment error", details, db.ErrorLevel))
+				c.notify(newFeePaymentNote("Fee payment error", details, db.ErrorLevel, dc.acct.url))
 			} else {
 				details := fmt.Sprintf("You may now trade at %s", dc.acct.url)
-				c.notify(newFeePaymentNote("Account registered", details, db.Success))
+				c.notify(newFeePaymentNote("Account registered", details, db.Success, dc.acct.url))
 			}
 		}()
 		if err != nil {
@@ -960,14 +960,14 @@ func (c *Core) initializeDEXConnections(crypter encrypt.Crypter) {
 		err := dc.acct.unlock(crypter)
 		if err != nil {
 			details := fmt.Sprintf("error unlocking account for %s: %v", dc.acct.url, err)
-			c.notify(newFeePaymentNote("Account unlock error", details, db.ErrorLevel))
+			c.notify(newFeePaymentNote("Account unlock error", details, db.ErrorLevel, dc.acct.url))
 			continue
 		}
 		dcrID, _ := dex.BipSymbolID("dcr")
 		if !dc.acct.feePaid() {
 			if len(dc.acct.feeCoin) == 0 {
 				details := fmt.Sprintf("Empty fee coin for %s.", dc.acct.url)
-				c.notify(newFeePaymentNote("Fee coin error", details, db.ErrorLevel))
+				c.notify(newFeePaymentNote("Fee coin error", details, db.ErrorLevel, dc.acct.url))
 				continue
 			}
 			// Try to unlock the Decred wallet, which should run the reFee cycle, and
@@ -976,14 +976,14 @@ func (c *Core) initializeDEXConnections(crypter encrypt.Crypter) {
 			if err != nil {
 				log.Debugf("Failed to connect for reFee at %s with error: %v", dc.acct.url, err)
 				details := fmt.Sprintf("Incomplete registration detected for %s, but failed to connect to the Decred wallet", dc.acct.url)
-				c.notify(newFeePaymentNote("Wallet connection warning", details, db.WarningLevel))
+				c.notify(newFeePaymentNote("Wallet connection warning", details, db.WarningLevel, dc.acct.url))
 				continue
 			}
 			if !dcrWallet.unlocked() {
 				err = unlockWallet(dcrWallet, crypter)
 				if err != nil {
 					details := fmt.Sprintf("Connected to Decred wallet to complete registration at %s, but failed to unlock: %v", dc.acct.url, err)
-					c.notify(newFeePaymentNote("Wallet unlock error", details, db.ErrorLevel))
+					c.notify(newFeePaymentNote("Wallet unlock error", details, db.ErrorLevel, dc.acct.url))
 					continue
 				}
 			}
@@ -997,7 +997,7 @@ func (c *Core) initializeDEXConnections(crypter encrypt.Crypter) {
 			err := c.authDEX(dc)
 			if err != nil {
 				details := fmt.Sprintf("%s: %v", dc.acct.url, err)
-				c.notify(newFeePaymentNote("DEX auth error", details, db.ErrorLevel))
+				c.notify(newFeePaymentNote("DEX auth error", details, db.ErrorLevel, dc.acct.url))
 				return
 			}
 		}(dc)
@@ -1549,7 +1549,7 @@ func (c *Core) initialize() {
 					"Registration will be completed when the Decred wallet is unlocked.",
 					acct.URL)
 				details := fmt.Sprintf("Unlock your Decred wallet to complete registration for %s", acct.URL)
-				c.notify(newFeePaymentNote("Incomplete registration", details, db.WarningLevel))
+				c.notify(newFeePaymentNote("Incomplete registration", details, db.WarningLevel, acct.URL))
 				// checkUnpaidFees will pay the fees if the wallet is unlocked
 			}
 			c.connMtx.Lock()
@@ -1655,11 +1655,11 @@ func (c *Core) reFee(dcrWallet *xcWallet, dc *dexConnection) {
 		if err != nil {
 			log.Errorf("reFee %s - notifyfee error: %v", dc.acct.url, err)
 			details := fmt.Sprintf("Error encountered while paying fees to %s: %v", dc.acct.url, err)
-			c.notify(newFeePaymentNote("Fee payment error", details, db.ErrorLevel))
+			c.notify(newFeePaymentNote("Fee payment error", details, db.ErrorLevel, dc.acct.url))
 		} else {
 			log.Infof("Fee paid at %s", dc.acct.url)
 			details := fmt.Sprintf("You may now trade at %s.", dc.acct.url)
-			c.notify(newFeePaymentNote("Registration complete", details, db.Success))
+			c.notify(newFeePaymentNote("Registration complete", details, db.Success, dc.acct.url))
 			// dc.acct.pay() and c.authDEX????
 			dc.acct.markFeePaid()
 			err = c.authDEX(dc)
