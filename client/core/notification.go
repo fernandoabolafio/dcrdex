@@ -102,13 +102,13 @@ type FeePaymentNote struct {
 	db.Notification
 	ConfirmationsRequired uint32 `json:"confirmationsrequired,omitempty"`
 	Confirmations         uint32 `json:"confirmations,omitempty"`
-	dex                   string `json:"dex,omitempty"`
+	DexURL                string `json:"dexurl,omitempty"`
 }
 
 func newFeePaymentNote(subject, details string, severity db.Severity, url string) *FeePaymentNote {
 	return &FeePaymentNote{
 		Notification: db.NewNotification("feepayment", subject, details, severity),
-		dex:          url,
+		DexURL:       url,
 	}
 }
 
