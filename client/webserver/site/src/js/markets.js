@@ -269,12 +269,18 @@ export default class MarketsPage extends BasePage {
       Doc.hide(page.orderForm)
       Doc.show(page.registrationStatus);
     } else {
-      // wait a couple of seconds before showing the form so the success
-      // message is shown to the user
-      setTimeout(() => {
+      const toggle = () => {
         Doc.hide(page.registrationStatus);
         Doc.show(page.orderForm);
-      }, 5000);
+      }
+
+      if(Doc.isHidden(page.orderForm)) {
+        // wait a couple of seconds before showing the form so the success
+        // message is shown to the user
+        setTimeout(toggle, 5000);
+        return;
+      }
+      toggle();
     }
   }
 
