@@ -34,6 +34,16 @@ export default class Application {
       accounts: {},
       wallets: {}
     }
+
+    // This is used to override the subject of notes which are appended to the
+    // notifications dropdown but needs a better subject to be presented. This
+    // is mainly for notes which have been given a shorter name to attend
+    // multiple purposes (e.g presentational and trigger for further actions).
+    // This is only for the presentation in the notification dropdown. Meaning
+    // that it is not forwarded to the loaded page.
+    this.noteSubjectOverride = {
+      regcompleted: 'Account registered!'
+    }
   }
 
   /**
@@ -304,7 +314,8 @@ export default class Application {
       const cls = note.severity === ntfn.SUCCESS ? 'good' : note.severity === ntfn.WARNING ? 'warn' : 'bad'
       el.querySelector('div.note-indicator').classList.add(cls)
     }
-    el.querySelector('div.note-subject').textContent = note.subject
+
+    el.querySelector('div.note-subject').textContent = this.noteSubjectOverride[note.subject] || note.subject
     el.querySelector('div.note-details').textContent = note.details
     return el
   }

@@ -876,7 +876,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 				c.notify(newFeePaymentNote("Fee payment error", details, db.ErrorLevel, dc.acct.url))
 			} else {
 				details := fmt.Sprintf("You may now trade at %s", dc.acct.url)
-				c.notify(newFeePaymentNote("regcompleted", details, db.Data, dc.acct.url))
+				c.notify(newFeePaymentNote("regcompleted", details, db.Success, dc.acct.url))
 				c.refreshUser()
 			}
 		}()
@@ -1660,7 +1660,7 @@ func (c *Core) reFee(dcrWallet *xcWallet, dc *dexConnection) {
 		} else {
 			log.Infof("Fee paid at %s", dc.acct.url)
 			details := fmt.Sprintf("You may now trade at %s.", dc.acct.url)
-			c.notify(newFeePaymentNote("regcompleted", details, db.Data, dc.acct.url))
+			c.notify(newFeePaymentNote("regcompleted", details, db.Success, dc.acct.url))
 			// dc.acct.pay() and c.authDEX????
 			dc.acct.markFeePaid()
 			err = c.authDEX(dc)
