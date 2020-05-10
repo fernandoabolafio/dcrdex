@@ -877,6 +877,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 			} else {
 				details := fmt.Sprintf("You may now trade at %s", dc.acct.url)
 				c.notify(newFeePaymentNote("regcompleted", details, db.Data, dc.acct.url))
+				c.refreshUser()
 			}
 		}()
 		if err != nil {
