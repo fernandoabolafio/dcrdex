@@ -74,8 +74,8 @@ export default class Doc {
     for (const el of els) el.classList.remove('d-hide')
   }
 
-  static isHidden(el) {
-    return el.classList.contains('d-hide');
+  static isHidden (el) {
+    return el.classList.contains('d-hide')
   }
 
   /*
