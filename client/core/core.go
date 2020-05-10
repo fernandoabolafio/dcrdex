@@ -877,7 +877,6 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 			} else {
 				details := fmt.Sprintf("You may now trade at %s", dc.acct.url)
 				c.notify(newFeePaymentNote("regcompleted", details, db.Success, dc.acct.url))
-				c.refreshUser()
 			}
 		}()
 		if err != nil {
@@ -893,6 +892,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 		if err != nil {
 			log.Errorf("fee paid, but failed to authenticate connection to %s: %v", dc.acct.url, err)
 		}
+		c.refreshUser()
 	})
 
 }
