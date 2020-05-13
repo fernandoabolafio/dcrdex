@@ -863,7 +863,7 @@ func (c *Core) verifyRegistrationFee(wallet *xcWallet, dc *dexConnection, coinID
 		details := fmt.Sprintf("Fee payment confirmations %v/%v", confs, uint32(reqConfs))
 
 		if confs < uint32(reqConfs) {
-			c.notify(newFeePaymentNoteWithConfirmations("regupdate", details, db.Data, uint32(reqConfs), confs, dc.acct.url))
+			c.notify(newFeePaymentNoteWithConfirmations("regupdate", details, db.Data, confs, dc.acct.url))
 		}
 
 		return confs >= uint32(reqConfs), nil
