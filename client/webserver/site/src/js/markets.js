@@ -728,7 +728,7 @@ export default class MarketsPage extends BasePage {
         case 'regupdate':
           this.updateDexRegistrationStatus(note.confirmationsrequired, note.confirmations)
           break
-        case 'regcompleted':
+        case 'Account registered':
           this.markRegistrationStatusAsPaid()
           break
         default:
