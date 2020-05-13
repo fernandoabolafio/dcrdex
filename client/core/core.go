@@ -391,10 +391,11 @@ func (c *Core) Exchanges() map[string]*Exchange {
 	infos := make(map[string]*Exchange, len(c.conns))
 	for uri, dc := range c.conns {
 		infos[uri] = &Exchange{
-			URL:        uri,
-			Markets:    dc.markets(),
-			Assets:     dc.assets,
-			FeePending: dc.acct.feePending(),
+			URL:           uri,
+			Markets:       dc.markets(),
+			Assets:        dc.assets,
+			FeePending:    dc.acct.feePending(),
+			ConfsRequired: uint32(dc.cfg.RegFeeConfirms),
 		}
 	}
 	return infos

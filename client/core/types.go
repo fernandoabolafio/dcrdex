@@ -160,10 +160,11 @@ func (m *Market) marketName() string {
 
 // Exchange represents a single DEX with any number of markets.
 type Exchange struct {
-	URL        string                `json:"url"`
-	Markets    map[string]*Market    `json:"markets"`
-	Assets     map[uint32]*dex.Asset `json:"assets"`
-	FeePending bool                  `json:"feePending"`
+	URL           string                `json:"url"`
+	Markets       map[string]*Market    `json:"markets"`
+	Assets        map[uint32]*dex.Asset `json:"assets"`
+	FeePending    bool                  `json:"feePending"`
+	ConfsRequired uint32                `json:"confsrequired"`
 }
 
 // Return the markets as a slice sorted by Display ID, ascending.
