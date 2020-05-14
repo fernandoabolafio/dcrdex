@@ -227,7 +227,6 @@ export default class Application {
     const dex = this.exchanges[dexUrl]
     dex.feePending = !isPaid
     dex.confs = confs
-    // trigger update in the loaded page
     this.loadedPage.registrationStatusUpdated(dexUrl)
   }
 
@@ -276,6 +275,9 @@ export default class Application {
           }
         }
       }
+        break
+      case 'feepayment':
+        this.handleFeePaymentNote(note)
     }
     // Inform the page.
     this.loadedPage.notify(note)

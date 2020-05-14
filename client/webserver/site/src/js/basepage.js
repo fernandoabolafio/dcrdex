@@ -6,7 +6,7 @@ export default class BasePage {
   }
 
   registrationStatusUpdated (dexUrl) {
-    if (!this.onRegistrationStatupsUpdated) return
+    if (!this.onRegistrationStatusUpdated) return
     this.onRegistrationStatusUpdated(dexUrl)
   }
 
