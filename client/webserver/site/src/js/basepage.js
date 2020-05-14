@@ -5,6 +5,11 @@ export default class BasePage {
     this.notifiers[note.type](note)
   }
 
+  registrationStatusUpdated (dexUrl) {
+    if (!this.onRegistrationStatupsUpdated) return
+    this.onRegistrationStatusUpdated(dexUrl)
+  }
+
   /* unload is called when the user navigates away from the page. */
   unload () {}
 }
