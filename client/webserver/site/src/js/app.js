@@ -96,6 +96,7 @@ export default class Application {
     if (!this.checkResponse(user)) return
     this.user = user
     this.assets = user.assets
+    this.exchanges = user.exchanges
     this.walletMap = {}
     for (const [assetID, asset] of Object.entries(user.assets)) {
       if (asset.wallet) {
@@ -220,6 +221,31 @@ export default class Application {
         await this.loadPage(page)
       })
     })
+  }
+
+  updateExchangeRegistration (dexUrl, isPaid, confs) {
+    const dex = this.exchanges[dexUrl]
+    dex.feePending = !isPaid
+    dex.confs = confs
+    // trigger update in the loaded page
+    this.loadedPage.registrationStatusUpdated(dexUrl)
+  }
+
+  /*
+   * handleFeePaymentNote is the handler for the 'feepayment'-type notificaetion, which
+   * is used to update the dex registration's status.
+   */
+  handleFeePaymentNote (note) {
+    switch (note.subject) {
+      case 'regupdate':
+        this.updateExchangeRegistration(note.dexurl, false, note.confirmations)
+        break
+      case 'Account registered':
+        this.updateExchangeRegistration(note.dexurl, true)
+        break
+      default:
+        break
+    }
   }
 
   /*
