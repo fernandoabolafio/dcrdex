@@ -118,12 +118,12 @@
             <div class="fs15 pt-3 text-center d-hide" id="loaderMsg"></div>
             
             {{- /* REGISTRATION STATUS */ -}}
-            <div id="registrationStatus">
+            <div class="d-hide" id="registrationStatus">
               <div class="p-0 w-100">
                 <div class="d-flex flex-column justify-content-center align-items-center">
                   <span id="regStatusTitle" class="title"></span>
-                  <p>In order to trade at <span id="regStatusDex"></span>, the regsitration fee payment
-                    needs to be confirmed. The number of confirmations received will appear below once it
+                  <p>In order to trade at <span id="regStatusDex"></span>, the registration fee payment
+                    needs <span id="confReq"></span> confirmations. The number of confirmations received will appear below once it
                     is available.
                   </p>
                   <span id="regStatusMessage"></span>
