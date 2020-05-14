@@ -230,6 +230,17 @@ export default class MarketsPage extends BasePage {
     Doc.hide(page.loaderMsg)
   }
 
+  /* setRegistrationStatusViewContent sets the text content and class for the
+   * registration status view
+   */
+  setRegistrationStatusView (titleContent, messageContent, titleClass) {
+    const page = this.page
+    page.regStatusTitle.textContent = titleContent
+    page.regStatusMessage.textContent = messageContent
+    page.regStatusTitle.classList.remove('completed', 'error', 'waiting')
+    page.regStatusTitle.classList.add(titleClass)
+  }
+
   /*
    * updateRegistrationStatusView udpates the view based on the current
    * registration status
@@ -240,22 +251,15 @@ export default class MarketsPage extends BasePage {
     page.confReq.textContent = confirmationsRequired
     page.regStatusDex.textContent = dexUrl
 
-    const updateHandler = (titleContent, messageContent, titleClass) => {
-      page.regStatusTitle.textContent = titleContent
-      page.regStatusMessage.textContent = messageContent
-      page.regStatusTitle.classList.remove('completed', 'error', 'waiting')
-      page.regStatusTitle.classList.add(titleClass)
-    }
-
     if (feePaid) {
-      updateHandler('Registration fee payment successful!', '', 'completed')
+      this.setRegistrationStatusView('Registration fee payment successful!', '', 'completed')
       return
     }
 
     const waitingMessage = [confirmations, confirmationsRequired]
       .every(v => typeof v === 'number') ? `${confirmations} / ${confirmationsRequired}` : ''
 
-    updateHandler('Waiting for confirmations...', waitingMessage, 'waiting')
+    this.setRegistrationStatusView('Waiting for confirmations...', waitingMessage, 'waiting')
   }
 
   setRegistrationStatusVisibility () {
